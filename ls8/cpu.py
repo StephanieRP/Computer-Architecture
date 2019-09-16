@@ -32,10 +32,6 @@ class CPU:
         self.L = None
         self.G = None
 
-    def __init__(self):
-        """Construct a new CPU."""
-        pass
-
     def load(self):
         """Load a program into memory."""
 
