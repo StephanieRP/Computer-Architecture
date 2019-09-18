@@ -30,40 +30,70 @@ class CPU:
         self.reg = [0] * 8
         self.ram = [0] * 256
         self.ram[0] = 0x00
-
+        
         # Markers
         self.PC = 0
         self.IR = None
         self.FL = 0
         self.MAR = None
         self.MDR = None
-        self.SP = 7  # self.reg[7]
+        self.SP = 7 # self.reg[7]
 
         #  Flags
         self.E = None
         self.L = None
         self.G = None
 
-    def load(self):
+
+    def load(self, filename):
         """Load a program into memory."""
 
-        address = 0
+        try:
+            address = 0
+
+            with open(filename) as f:
+                for line in f:
+
+                    # parse each line
+                    # split before and after comment symbol
+                    comment_split = line.split("#")
+
+                    # remove extra white space
+                    instruction = comment_split[0].strip()
+
+                    # ignore blanks
+                    if instruction == "":
+                        continue
+
+                    # convert instruction to binary int
+                    # instruction = f"0b{instruction}"
+                    value = int(instruction, 2)
+
+                    # set binary value as memory at current address
+                    self.ram[address] = value
+
+                    # increment address for next value
+                    address += 1
+
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010,  # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111,  # PRN R0
-            0b00000000,
-            0b00000001,  # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010,  # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111,  # PRN R0
+        #     0b00000000,
+        #     0b00000001,  # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -77,7 +107,7 @@ class CPU:
         elif op == "CMP":
             """If they are equal, set the Equal E flag to 1, otherwise set it to 0.
             If registerA is less than registerB, set the Less-than L flag to 1, otherwise set it to 0.
-
+            
             If registerA is greater than registerB, set the Greater-than G flag to 1, otherwise set it to 0."""
 
             self.E = 0
@@ -132,6 +162,7 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
+
         running = True
 
         while running:
